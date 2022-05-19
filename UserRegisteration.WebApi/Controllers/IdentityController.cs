@@ -24,38 +24,16 @@ namespace UserRegisteration.WebApi.Controllers
             _identityService = identityService;
             _jWTManager = jWTManager;
         }
+
+
         [AllowAnonymous]
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterAsync(RegisterRequestDTO data)
         {
-            try
-            {
-                //get token from CSS
-                string credoToken = await _identityService.GetCredoToken();
-                if (credoToken == null)
-                    return BadRequest("Could not connect to CSS Api !");
-
-
-                RegisterRequest registerRequest = new RegisterRequest();
-
-                // find person by passing token to PersonFind API
-                registerRequest = await _identityService.PersonFind(data, credoToken);
-
-                if (registerRequest.PersonalNumber == null)
-                    return BadRequest("Cannot register because Personal Number does not exist in CSS database !");
-
-                
-                var getData = await _identityService.RegisterAsync(registerRequest);
+           
+                var getData = await _identityService.RegisterAsync(data);
                 getData.Messages.Add("Registered Successfully!");
                 return Ok(getData);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-
-
         }
 
         [AllowAnonymous]

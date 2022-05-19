@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BCrypt.Net;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -21,11 +22,13 @@ namespace UserRegistration.Application.Services.IdentityService
 
         private readonly IRepositoryAsync _repository;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
 
-        public IdentityService(IRepositoryAsync repository, IMapper mapper)
+        public IdentityService(IRepositoryAsync repository, IMapper mapper,IConfiguration configuration)
         {
             _repository = repository;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
         public async Task<string> GetCredoToken()
@@ -37,11 +40,11 @@ namespace UserRegistration.Application.Services.IdentityService
 
 
             var formList = new List<KeyValuePair<string, string>>();
-            formList.Add(new KeyValuePair<string, string>("client_id", "css"));
-            formList.Add(new KeyValuePair<string, string>("client_secret", "secret"));
-            formList.Add(new KeyValuePair<string, string>("grant_type", "password"));
-            formList.Add(new KeyValuePair<string, string>("username", "system"));
-            formList.Add(new KeyValuePair<string, string>("password", "kajWHdRskq9ZU2Cu"));
+            formList.Add(new KeyValuePair<string, string>("client_id", _configuration.GetSection("CSS").GetSection("client_id").Value));
+            formList.Add(new KeyValuePair<string, string>("client_secret", _configuration.GetSection("CSS").GetSection("client_secret").Value));
+            formList.Add(new KeyValuePair<string, string>("grant_type", _configuration.GetSection("CSS").GetSection("grant_type").Value));
+            formList.Add(new KeyValuePair<string, string>("username", _configuration.GetSection("CSS").GetSection("username").Value));
+            formList.Add(new KeyValuePair<string, string>("password", _configuration.GetSection("CSS").GetSection("password").Value));
             request.Content = new FormUrlEncodedContent(formList);
 
             var response = await client.SendAsync(request);
@@ -58,6 +61,9 @@ namespace UserRegistration.Application.Services.IdentityService
 
         public async Task<RegisterRequest> PersonFind(RegisterRequestDTO request, string token)
         {
+
+
+
             var getDataclient = new HttpClient();
             var getDatarequest = new HttpRequestMessage();
             getDatarequest.RequestUri = new Uri("http://test.api.css.credo.ge/api/Person/PersonFind");
@@ -95,17 +101,32 @@ namespace UserRegistration.Application.Services.IdentityService
 
 
         //Create
-        public async Task<IResponse<Guid>> RegisterAsync(RegisterRequest request)
+        public async Task<IResponse<Guid>> RegisterAsync(RegisterRequestDTO request)
         {
-            bool isUserExists = await _repository.ExistsAsync<UserEntity>(x => x.Username == request.Username);
+
+            string credoToken = await GetCredoToken();
+            if (credoToken == null)
+                return Response<Guid>.Fail("Could not connect to CSS Api !");
+
+            RegisterRequest registerRequest = new RegisterRequest();
+
+            // find person by passing token to PersonFind API
+            registerRequest = await PersonFind(request, credoToken);
+
+            if (registerRequest.PersonalNumber == null)
+                return Response<Guid>.Fail("Cannot register because Personal Number does not exist in CSS database !");
+
+
+
+            bool isUserExists = await _repository.ExistsAsync<UserEntity>(x => x.Username == registerRequest.Username);
 
             if (isUserExists)
                 return Response<Guid>.Fail("User already exists");
 
             //Mapping the values
             UserEntity user = new UserEntity();
-            request.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            user = _mapper.Map(request, user);
+            registerRequest.Password = BCrypt.Net.BCrypt.HashPassword(registerRequest.Password);
+            user = _mapper.Map(registerRequest, user);
 
 
             try

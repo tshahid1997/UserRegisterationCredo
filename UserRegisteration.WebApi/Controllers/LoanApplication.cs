@@ -30,7 +30,6 @@ namespace UserRegisteration.WebApi.Controllers
         public async Task<IActionResult> GetLoanApplication(Guid id)
         {
             var venues = await _loanApplicationService.GetLoanApplication(id);
-
             return Ok(venues);
         }
 
@@ -38,39 +37,18 @@ namespace UserRegisteration.WebApi.Controllers
         [HttpPost("SendApplication")]
         public async Task<IActionResult> CreateAsync(CreateLoanApplicationRequest request)
         {
-
-            try
-            {
                 var result = await _loanApplicationService.CreateLoanApplicationAsync(request);
                 return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
         }
 
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAsync(UpdateLoanApplicationRequest request, Guid id)
         {
-            try
-            {
+         
                 var result = await _loanApplicationService.UpdateLoanApplicationAsync(request, id);
                 return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
         }
 
-       
-
-
     }
-
-
-
-
 }

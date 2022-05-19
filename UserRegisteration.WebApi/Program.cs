@@ -1,4 +1,5 @@
 using UserRegisteration.WebApi.ConfigurationHelper;
+using UserRegisteration.WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +20,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

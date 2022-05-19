@@ -23,15 +23,6 @@ namespace UserRegisteration.WebApi.Mapper
                .ForMember(x => x.StatusTypeString, o => o.MapFrom(s => UserRegistrationExtensions.GetEnumDescription(s.Status)));
             CreateMap<CreateLoanApplicationRequest, LoanApplicationEntity>();
             CreateMap<UpdateLoanApplicationRequest, LoanApplicationEntity>();
-
-
-
-            //CreateMap<Venue, VenueDTO>()
-            //   .ForMember(x => x.TypeString, o => o.MapFrom(s => NanoHelpers.GetEnumDescription(s.Type)));
-            //CreateMap<CreateVenueRequest, Venue>();
-            //CreateMap<UpdateVenueRequest, Venue>();
-
-
         }
     }
 }

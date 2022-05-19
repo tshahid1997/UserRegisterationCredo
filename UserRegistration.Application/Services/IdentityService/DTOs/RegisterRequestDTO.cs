@@ -13,6 +13,7 @@ namespace UserRegistration.Application.Services.IdentityService.DTOs
         public string? Username { get; set; }
         public string? Password { get; set; }
         public string? PersonalNumber { get; set; }
+ 
     }
 
     public class RegisterRequestValidator : FluentValidation.AbstractValidator<RegisterRequestDTO>

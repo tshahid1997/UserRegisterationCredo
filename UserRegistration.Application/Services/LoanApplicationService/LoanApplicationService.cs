@@ -88,7 +88,6 @@ namespace UserRegistration.Application.Services.LoanApplicationService
             {
                 return Response<Guid>.Fail(ex.Message);
             }
-
         }
 
 

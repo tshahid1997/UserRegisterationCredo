@@ -13,7 +13,7 @@ namespace UserRegistration.Application.Services.IdentityService
 
     public interface IIdentityService : ITransientService
     {
-        Task<IResponse<Guid>> RegisterAsync(RegisterRequest modal);
+        Task<IResponse<Guid>> RegisterAsync(RegisterRequestDTO modal);
         Task<String> GetCredoToken();
         Task<RegisterRequest> PersonFind(RegisterRequestDTO request,string token);
 
